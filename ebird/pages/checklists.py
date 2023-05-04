@@ -64,8 +64,7 @@ def _scrape_location(node):
 
 
 def _scrape_site(node):
-    tag = node.find('h6').parent.find('span')
-    return tag.text.strip()
+    return node.find("a", href=re.compile("hotspot")).span.text
 
 
 def _scrape_subnational2(node):
