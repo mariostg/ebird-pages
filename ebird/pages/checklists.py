@@ -84,16 +84,11 @@ def _scrape_subnational1_code(node):
 
 
 def _scrape_country(node):
-    node = node.find("span", {"class": "is-visuallyHidden"})
-    node = node.parent.find_all("li")[2]
-    return node.find("a").text.strip()
+    return node.find_all("a", href=re.compile("region"))[2].span.text
 
 
 def _scrape_country_code(node):
-    node = node.find("span", {"class": "is-visuallyHidden"})
-    node = node.parent.find_all("li")[2]
-    url = node.find("a")["href"]
-    return url.split("/")[-1]
+    return node.find_all("a", href=re.compile("region"))[2].attrs["href"].split("/")[2]
 
 
 def _scrape_location_identifier(node):
