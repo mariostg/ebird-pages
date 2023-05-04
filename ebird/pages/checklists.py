@@ -92,16 +92,11 @@ def _scrape_country_code(node):
 
 
 def _scrape_location_identifier(node):
-    url = node.find("h6").parent.find("a")["href"]
-    return url.split("/")[-1]
+    return node.find("a", href=re.compile("hotspot")).attrs["href"].split("/")[2]
 
 
 def _scrape_coords(node):
-    tag = node.find_all("a")[1]
-    query = tag["href"].split("?")[1]
-    param = query.split("&")[1]
-    coords = param.split("=")[1]
-    return coords.split(",")
+    return node.find("a", {"class": "u-inset-squish-sm"}).attrs["href"].split("=")[2]
 
 
 def _point_protocol(node):
