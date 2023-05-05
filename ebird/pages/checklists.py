@@ -256,10 +256,10 @@ def _scrape_date(node):
 
 def _scrape_time(node):
     time = None
-    field = node.find("h5", class_="rep-obs-date")
-    value = " ".join(field.text.split()[4:])
+    value = node.find("time").attrs["datetime"]
     if value:
-        time = datetime.datetime.strptime(value, "%I:%M %p").time()
+        dt = datetime.datetime.strptime(value, "%Y-%m-%dT%H:%M")
+        time = dt.strftime("%I:%M %p")
     return time
 
 
