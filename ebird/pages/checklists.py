@@ -47,7 +47,7 @@ def _scrape_identifier(node):
 
 
 def _scrape_location(node):
-    node = node.find_all("section")[2]
+    _node = node.find_all("section")[2]
     coords = _scrape_coords(node)
     return {
         "name": _scrape_site(node),
@@ -244,9 +244,7 @@ def _scrape_protocol(node):
 
 
 def _scrape_protocol_name(node):
-    regex = re.compile(r"^Protocol: .*")
-    tag = node.find("span", title=regex)
-    return tag.text.strip()
+    return node.find("span", {"class": "Heading-main u-inline-sm"})
 
 
 def _scrape_date(node):
@@ -373,9 +371,10 @@ def _scrape_comment(node):
 def _scrape_entries(node):
     entries = []
     node = node.find("main", {"id": "list"})
-    tags = node.find_all("li", {"data-observation": ""})
-    for tag in tags:
-        entries.append(_scrape_entry(tag))
+    if node:
+        tags = node.find_all("li", {"data-observation": ""})
+        for tag in tags:
+            entries.append(_scrape_entry(tag))
     return entries
 
 
