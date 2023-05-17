@@ -48,7 +48,7 @@ def _scrape_identifier(node):
 
 def _scrape_location(node):
     _node = node.find_all("section")[2]
-    coords = _scrape_coords(node)
+    coords = _scrape_coords(node).split(",")
     return {
         "name": _scrape_site(node),
         "identifier": _scrape_location_identifier(node),
@@ -58,8 +58,8 @@ def _scrape_location(node):
         "subnational1_code": _scrape_subnational1_code(node),
         "country": _scrape_country(node),
         "country_code": _scrape_country_code(node),
-        "lat": float(coords[0]),
-        "lon": float(coords[1]),
+        "lat": coords[0],
+        "lon": coords[1],
     }
 
 
@@ -363,14 +363,16 @@ def _scrape_observers(node):
 
 
 def _scrape_comment(node):
-    section = node.find("h6", text="Checklist Comments").parent
-    items = [p.text.strip() for p in section.find_all("p")]
-    return " ".join(items)
+    # TODO This one is tricky
+    return "Comment not implemented"
+    # section = node.find("h6", text="Checklist Comments").parent
+    # items = [p.text.strip() for p in section.find_all("p")]
+    # return " ".join(items)
 
 
 def _scrape_entries(node):
     entries = []
-    node = node.find("main", {"id": "list"})
+    node = node.find("div", {"id": "list"})
     if node:
         tags = node.find_all("li", {"data-observation": ""})
         for tag in tags:
@@ -386,10 +388,10 @@ def _scrape_entry(node):
 
 
 def _scrape_species(node):
-    node = node.find("div", {"class": "Observation-species"})
-    tag = node.find("span", {"class": "Heading-main"})
-    value = " ".join(tag.text.split())
-    return value
+    node = node.find("div", {"class": "Observation-species"}).span.text
+    # tag = node.find("span", {"class": "Heading-main"})
+    # value = " ".join(tag.text.split())
+    return node
 
 
 def _scrape_count(node):
@@ -403,8 +405,5 @@ def _scrape_count(node):
 
 
 def _scrape_complete(node):
-    regex = re.compile(r"^Protocol: .*")
-    heading = node.find("span", title=regex).parent
-    tag = heading.find("span", {"class": "Badge-label"})
-    value = tag.text.strip()
+    value = node.find_all("span", {"class": "Badge-label"})[0].text
     return value == "Complete"
