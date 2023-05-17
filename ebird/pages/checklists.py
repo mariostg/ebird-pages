@@ -244,7 +244,7 @@ def _scrape_protocol(node):
 
 
 def _scrape_protocol_name(node):
-    return node.find("span", {"class": "Heading-main u-inline-sm"})
+    return node.find("span", {"class": "Heading-main u-inline-sm"}).text
 
 
 def _scrape_date(node):
