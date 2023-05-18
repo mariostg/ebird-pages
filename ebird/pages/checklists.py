@@ -238,7 +238,7 @@ def _scrape_protocol(node):
     }
 
     # TODO enable
-    # results.update(_protocols[results['name']](node))
+    results.update(_protocols[results["name"]](node))
 
     return results
 
@@ -263,28 +263,20 @@ def _scrape_time(node):
 
 def _scrape_party_size(node):
     count = None
-    regex = re.compile(r"\s*[Pp]arty[\s]+[Ss]ize[:]?\s*")
-    tag = node.find("dt", text=regex)
-    if tag:
-        field = tag.parent.dd
-        count = int(field.text.strip())
+    regex = re.compile(r"\s*[Oo]bservers[:]?\s*")
+    tag = node.find("span", string=regex)
+    count = tag.find_next_sibling().text
     return count
 
 
 def _scrape_distance(node):
-    distance = None
-    units = None
-
     regex = re.compile(r"\s*[Dd]istance[:]?\s*")
-    tag = node.find("dt", text=regex)
+    dist = node.find("span", {"title": regex})
 
-    if tag:
-        field = tag.parent.dd
-        values = field.text.lower().split()
-        distance = float(values[0])
-        units = _scrape_distance.units[values[1]]
+    if dist:
+        dist = dist.find("span", {"class": "Badge-label"}).text
 
-    return distance, units
+    return dist
 
 
 _scrape_distance.units = {
@@ -329,42 +321,30 @@ def _scrape_duration(node):
     duration = None
 
     regex = re.compile(r"\s*[Dd]uration[:]?\s*")
-    tag = node.find("dt", text=regex)
+    tag = node.find("span", {"title": regex})
 
     if tag:
-        field = tag.parent.dd
-        values = field.text.lower().split()
-
-        if "minute(s)" in values:
-            minutes = int(values[values.index("minute(s)") - 1])
-        else:
-            minutes = 0
-
-        if "hour(s)" in values:
-            hours = int(values[values.index("hour(s)") - 1])
-        else:
-            hours = 0
-
-        duration = datetime.timedelta(hours=hours, minutes=minutes)
+        duration = tag.find("span", {"class": "Badge-label"}).text
 
     return duration
 
 
 def _scrape_observers(node):
     observers = []
-
-    regex = re.compile(r"\s*[Oo]bservers[:]?\s*")
-    tag = node.find("dt", text=regex)
-    field = tag.parent.dd
-    name = " ".join(field.text.split())
-    observers.append(name)
-
+    owner = node.find("span", string="Owner")
+    observers.append(owner.text)
+    others = node.find("div", {"id": "checklist-others"})
+    for t in others:
+        try:
+            observers.append(t.find("span").text)
+        except:
+            pass
     return observers
 
 
 def _scrape_comment(node):
-    # TODO This one is tricky
-    return "Comment not implemented"
+    # TODO Comments visible only if logged in.
+    comment = node.find("p", {"class": "u-constrainBody"})
     # section = node.find("h6", text="Checklist Comments").parent
     # items = [p.text.strip() for p in section.find_all("p")]
     # return " ".join(items)
@@ -407,3 +387,7 @@ def _scrape_count(node):
 def _scrape_complete(node):
     value = node.find_all("span", {"class": "Badge-label"})[0].text
     return value == "Complete"
+
+
+if __name__ == "__main__":
+    print(get_checklist("S136374832"))
